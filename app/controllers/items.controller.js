@@ -1,19 +1,25 @@
 const db = require('../config/db');
 const { ObjectId } = require('mongodb');
 
+
 exports.getItems = async function(req, res) {
-    let combine = [{ gender:req.query.gender}]
+    let combine = [];
+    if (Object.keys(req.query).includes('gender')) {
+        combine.push({gender:req.query.gender})
+    }
+
     if (Object.keys(req.query).includes('q')) {
         const color = 'colors.' + req.query.q;
-        combine.push({$or: [{ name: new RegExp(`.*${req.query.q}.*`, "i") }, {[color]:{ $exists : true } }]});
+        combine.push({$or: [{ name: new RegExp(`.*${req.query.q}.*`, "i") }, {[color]:{ $exists : true }},{ category: new RegExp(`.*${req.query.q}.*`, "i")}]});
     }
-    if (req.query.category !== 'all') {
+
+    if (Object.keys(req.query).includes('category') && req.query.category !== 'all') {
         combine.push({ category: new RegExp(`.*${req.query.category.slice(0, -1)}.*`, "i") });
     }
 
     db.connect().then((client) => {
         if (Object.keys(req.query).length === 0) {
-            client.db('ui').collection('items').find({ "colors.black" : { $exists : true } }).toArray((err, result) => {
+            client.db('ui').collection('items').find().toArray((err, result) => {
                 if (err) throw err
                 res.status(200).json(result);
             })
