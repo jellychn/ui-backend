@@ -1,4 +1,5 @@
 var express = require('express');
+const bodyParser = require('body-parser');
 
 const allowCrossOriginRequests = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -13,9 +14,15 @@ module.exports = function () {
 
     // MIDDLEWARE
     app.use(allowCrossOriginRequests);
+    app.use(bodyParser.json());
+    app.use(bodyParser.raw({ type: 'text/plain'}));  // for the /executeSql endpoint
+    app.use(bodyParser.raw({ type: 'image/png', limit: '50mb' }));  // for the /executeSql endpoint
+    app.use(bodyParser.raw({ type: 'image/jpeg', limit: '50mb' }));  // for the /executeSql endpoint
+    app.use(bodyParser.raw({ type: 'multipart/form-data', limit: '50mb' }));  // for the /executeSql endpoint
 
     // ROUTES
     require('../routes/items.routers')(app);
+    require('../routes/users.routes')(app);
 
     // DEBUG (you can remove this)
     app.get('/', function (req, res) {
