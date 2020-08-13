@@ -23,6 +23,7 @@ module.exports = function () {
     // ROUTES
     require('../routes/items.routers')(app);
     require('../routes/users.routes')(app);
+    require('../routes/orders.routes')(app);
 
     // DEBUG (you can remove this)
     app.get('/', function (req, res) {

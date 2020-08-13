@@ -36,7 +36,6 @@ exports.register = async function(req, res) {
         if (validated === 4) {
             db.connect().then((client) => {
                 client.db('ui').collection('users').find({email:req.body.email}).toArray((err, result) => {
-                    console.log(result);
                     if (err) {
                         res.status(500).json({'error':err});
                     } else {
@@ -101,7 +100,25 @@ exports.login = async function(req, res) {
 };
 
 exports.logout = async function(req, res) {
-    
+    console.log(req.headers)
+    if (req.headers['x-authorization'] !== null || req.headers['x-authorization'] !== '' || req.headers['x-authorization'] !== undefined) {
+        db.connect().then(client => {
+            client.db('ui').collection('users').findOne({token:req.headers['x-authorization']}).then(result => {
+                if (result !== null) {
+                    client.db('ui').collection('users').updateOne({token:req.headers['x-authorization']}, { $set: {'token':null}});
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(404);
+                }
+            }).catch(err => {
+                res.sendStatus(500);
+            });
+        }).catch(err => {
+            res.sendStatus(500);
+        })
+    } else {
+        res.sendStatus(500);
+    }
 };
 
 exports.authenticated = async function(req, res) {
@@ -128,7 +145,7 @@ exports.getUser = async function(req, res) {
             client.db('ui').collection('users').findOne({token:req.headers['x-authorization']}).then(result => {
                 if (result !== null) {
                     res.status(200).json({
-                        'id_': result._id,
+                        '_id': result._id,
                         'email': result.email,
                         'firstname': result.firstname,
                         'lastname': result.lastname
