@@ -8,4 +8,5 @@ module.exports = function(app) {
     app.route(app.rootUrl + '/users/user').post(users.getUser);
     app.route(app.rootUrl + '/users/updateDetails').post(users.updateUserDetails);
     app.route(app.rootUrl + '/users/updatePassword').post(users.updateUserPassword);
+    app.route(app.rootUrl+ '/users/updateCart').post(users.updateUserCart);
 };

@@ -30,7 +30,9 @@ exports.register = async function(req, res) {
             'email': req.body.email,
             'password': hashedPassword,
             'firstname': req.body.firstname.toLowerCase(),
-            'lastname': req.body.lastname.toLowerCase()
+            'lastname': req.body.lastname.toLowerCase(),
+            'cart': [],
+            'favorites': []
         };
     
         if (validated === 4) {
@@ -148,7 +150,9 @@ exports.getUser = async function(req, res) {
                         '_id': result._id,
                         'email': result.email,
                         'firstname': result.firstname,
-                        'lastname': result.lastname
+                        'lastname': result.lastname,
+                        'cart': result.cart,
+                        'favorites': result.favorites
                     });
                 } else {
                     res.sendStatus(404);
@@ -239,17 +243,35 @@ exports.updateUserPassword = async function(req, res) {
                     });
                 }).catch(err => {
                     res.sendStatus(500);
-                    console.log('ss')
                 });
             } else {
                 res.sendStatus(404);
             }
         } else {
             res.sendStatus(500);
-            console.log('sss')
         }
     } else {
         res.sendStatus(500);
-        console.log('ssss')
+    }
+};
+
+exports.updateUserCart = async function(req, res) {
+    if (Object.keys(req.body).includes('cart')) {
+        if (req.headers['x-authorization'] !== null || req.headers['x-authorization'] !== '' || req.headers['x-authorization'] !== undefined) {
+            db.connect().then(client => {
+                client.db('ui').collection('users').findOne({token:req.headers['x-authorization']}).then(result => {
+                    if (result !== null) {
+                        client.db('ui').collection('users').updateOne({token:req.headers['x-authorization']}, { $set: {'cart':req.body.cart}});
+                        res.sendStatus(200);
+                    } else {
+                        res.sendStatus(404);
+                    }
+                }).catch(err => {
+                    res.sendStatus(404);
+                });
+            }).catch(err => {
+                res.sendStatus(500);
+            });
+        }
     }
 };
